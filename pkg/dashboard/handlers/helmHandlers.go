@@ -153,7 +153,11 @@ func (h *HelmHandler) Install(c *gin.Context) {
 
 	justTemplate := c.Query("flag") != "true"
 	isInitial := c.Query("initial") != "true"
-	out, err := h.Data.ChartInstall(qp.Namespace, qp.Name, c.Query("chart"), c.Query("version"), justTemplate, c.PostForm("values"), isInitial)
+	chart := c.Query("chart")
+	if h.Data.IsLocal {
+		chart = h.Data.ChartPath
+	}
+	out, err := h.Data.ChartInstall(qp.Namespace, qp.Name, chart, c.Query("version"), justTemplate, c.PostForm("values"), isInitial)
 	if err != nil {
 		_ = c.AbortWithError(http.StatusInternalServerError, err)
 		return
@@ -270,4 +274,16 @@ func handleGetSection(data *subproc.DataLayer, section string, rDiff string, qp 
 		return "", err
 	}
 	return res, nil
+}
+
+func (h *HelmHandler) LocalChartAdd(c *gin.Context) {
+	chartPath := c.PostForm("path")
+	res, err := utils.GetChartInformation(chartPath)
+	if err != nil {
+		return
+	}
+	h.Data.IsLocal = true
+	h.Data.ChartPath = chartPath
+	res.SetIsLocal(true)
+	c.IndentedJSON(http.StatusOK, res)
 }

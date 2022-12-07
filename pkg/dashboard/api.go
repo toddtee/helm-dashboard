@@ -99,7 +99,14 @@ func configureRoutes(abortWeb utils.ControlChan, data *subproc.DataLayer, api *g
 	configureHelms(api.Group("/api/helm"), data)
 	configureKubectls(api.Group("/api/kube"), data)
 	configureScanners(api.Group("/api/scanners"), data)
+	//configureLocalCharts(api.Group("/api/local-charts"), data)
 }
+
+// func configureLocalCharts(api *gin.RouterGroup, data *subproc.DataLayer) {
+// 	l := handlers.LocalChartHandler{Data: data}
+
+// 	api.POST("/info", l.GetChartInfo)
+// }
 
 func configureHelms(api *gin.RouterGroup, data *subproc.DataLayer) {
 	h := handlers.HelmHandler{Data: data}
@@ -121,6 +128,8 @@ func configureHelms(api *gin.RouterGroup, data *subproc.DataLayer) {
 	api.GET("/repo/search", h.RepoSearch)
 	api.POST("/repo/update", h.RepoUpdate)
 	api.GET("/repo/values", h.RepoValues)
+
+	api.POST("/local-chart", h.LocalChartAdd)
 }
 
 func configureKubectls(api *gin.RouterGroup, data *subproc.DataLayer) {

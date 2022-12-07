@@ -12,6 +12,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	log "github.com/sirupsen/logrus"
+	"gopkg.in/yaml.v2"
 )
 
 var FailLogLevel = log.WarnLevel // allows to suppress error logging in some situations
@@ -124,4 +125,39 @@ func GetQueryProps(c *gin.Context, revRequired bool) (*QueryProps, error) {
 	qp.Revision = cRev
 
 	return &qp, nil
+}
+
+type ChartInformation struct {
+	ApiVersion  string `yaml:"apiVersion"`
+	Name        string `yaml:"name"`
+	Description string `yaml:"description"`
+	Type        string `yaml:"type"`
+	Version     string `yaml:"version"`
+	AppVersion  string `yaml:"appVersion"`
+	IsLocal     bool
+}
+
+func (c *ChartInformation) SetIsLocal(isLocal bool) {
+	c.IsLocal = isLocal
+}
+
+func GetChartInformation(path string) (*ChartInformation, error) {
+	if path[len(path)-1:] != string('/') {
+		path = path + string('/')
+	}
+	file, err := os.ReadFile(path + "Chart.yaml")
+
+	if err != nil {
+		return nil, err
+	}
+
+	var chartInformation ChartInformation
+
+	err = yaml.Unmarshal(file, &chartInformation)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return &chartInformation, nil
 }

@@ -35,6 +35,9 @@
                 <li class="nav-item mx-2">
                     <a class="nav-link px-3 section-repo">Repository</a>
                 </li>
+                <!-- <li class="nav-item mx-2">
+                    <a class="nav-link px-3 section-local-charts">Local Charts</a>
+                </li> -->
                 <li class="nav-item mx-2 dropdown">
                     <a class="nav-link dropdown-toggle section-help" role="button" data-bs-toggle="dropdown"
                        aria-expanded="false">
@@ -102,16 +105,25 @@
         <div class="col-3 ps-4 repo-list">
             <div class="p-2 bg-white rounded-1 b-shadow">
                 <h4 class="fs-6">Repositories</h4>
-                <ul class="list-unstyled p-2">
+                <ul id="remote-repo" class="list-unstyled p-2">
                 </ul>
-                <button class="btn btn-sm border-secondary text-muted">
+                <button class="btn-repo btn btn-sm border-secondary text-muted">
                     <i class="bi-plus-lg"></i> Add Repository
+                </button>
+            </div>
+            <br />
+            <div class="p-2 bg-white rounded-1 b-shadow br">
+                <h4 class="fs-6">Local Charts</h4>
+                <ul id="local-chart" class="list-unstyled p-2 local-chart">
+                </ul>
+                <button class="btn-local-chart btn btn-sm border-secondary text-muted">
+                    <i class="bi-plus-lg"></i> Add Local Chart
                 </button>
             </div>
         </div>
         <div class="col-9 repo-details bg-white b-shadow pt-4 px-5 overflow-auto rounded">
             <div class="float-end">
-                <button class="me-2 btn btn-sm btn-light bg-white border border-secondary btn-update">
+                <button id="repo-update" class="me-2 btn btn-sm btn-light bg-white border border-secondary btn-update">
                     <i class="bi-arrow-repeat"></i> Update
                 </button>
                 <button class="btn btn-sm btn-light bg-white border border-secondary btn-remove">
@@ -120,10 +132,10 @@
                 <p class="my-3"><input class="form-control form-control-sm" type="text" placeholder="Filter..."
                                        id="inputSearch"></p>
             </div>
-            <div><span class="text-muted small fw-bold me-3">REPOSITORY</span></div>
+            <div><span id="repo-title" class="text-muted small fw-bold me-3">REPOSITORY</span></div>
             <h2 class="mb-3">name-of-repo</h2>
             <div class="mb-5">
-                <span class="rounded rounded-1 me-2 p-1 px-2 bg-tag text-dark">URL: <span class="url fw-bold">http://somerepo/somepath</span></span>
+                <span id="repo-url" class="rounded rounded-1 me-2 p-1 px-2 bg-tag text-dark">URL: <span class="url fw-bold">http://somerepo/somepath</span></span>
             </div>
             <div class="py-2 mb-3 float-end">
 
@@ -137,6 +149,7 @@
             </div>
             <ul class="list-unstyled mt-4 charts"></ul>
         </div>
+
     </div>
 
     <div class="row mt-3 pt-3 me-5 section" id="sectionList" style="display: none">
@@ -363,6 +376,29 @@
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-primary btn-confirm">Add Repository</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal" id="localChartAddModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog modal-dialog-scrollable modal-xl">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h1 class="modal-title fs-5" id="localChartModalLabel">Add Local Chart</h1>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form>
+                    <div class="mb-3">
+                        <label for="local-chart-path" class="col-form-label">Path:</label>
+                        <input type="text" class="form-control" id="local-chart-path">
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary btn-confirm">Add Chart</button>
             </div>
         </div>
     </div>

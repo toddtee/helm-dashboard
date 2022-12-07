@@ -29,6 +29,7 @@ func (s Server) StartServer() (string, utils.ControlChan) {
 	data := subproc.DataLayer{
 		Namespace: s.Namespace,
 		Cache:     subproc.NewCache(),
+		IsLocal:   false,
 	}
 	err := data.CheckConnectivity()
 	if err != nil {

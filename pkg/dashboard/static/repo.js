@@ -6,7 +6,7 @@ function loadRepoView() {
         reportError("Failed to get list of repositories", xhr)
         sendStats('Get repo', {'status': 'fail'});
     }).done(function (data) {
-        const items = $("#sectionRepo .repo-list ul").empty()
+        const items = $("#sectionRepo .repo-list #remote-repo").empty()
         data.sort((a, b) => (a.name > b.name) - (a.name < b.name))
         
         data.forEach(function (elm) {
@@ -28,7 +28,10 @@ function loadRepoView() {
             setHashParam("repo", elm.name)
             $("#sectionRepo .repo-details").show()
             $("#sectionRepo .repo-details h2").text(elm.name)
+            $("#sectionRepo .repo-details #repo-url").show()
+            $("#sectionRepo .repo-details #repo-update").show()
             $("#sectionRepo .repo-details .url").text(elm.url)
+            $("#sectionRepo .repo-details #repo-title").text("REPOSITORY")
 
             $("#sectionRepo .repo-details ul").html('<span class="spinner-border spinner-border-sm mx-1" role="status" aria-hidden="true"></span>')
             $.getJSON("/api/helm/repo/charts?name=" + elm.name).fail(function (xhr) {
@@ -61,6 +64,47 @@ function loadRepoView() {
         } else {
             items.find("input").first().click()
         }
+
+       loadLocalCharts()
+    })
+}
+
+function loadLocalCharts() {
+    $("#sectionRepo .local-chart-details").hide()
+    const items = $("#sectionRepo .repo-list #local-chart").empty()
+    for (const key in localStorage) {
+        if (key.includes("local-chart")) {
+            let opt = $('<li class="mb-2"><label><input type="radio" name="cluster" class="me-2"/><span></span></label></li>');
+            let item = JSON.parse(localStorage.getItem(key))
+            opt.attr('title', item.name)
+            opt.find("input").val(item.name).text(item.name)//.data("item", item)
+            opt.find("span").text(item.name)
+            items.append(opt)
+        }
+    }
+
+    items.find("input").click(function () {
+        const self = $(this)
+        const item = JSON.parse(localStorage.getItem("local-chart-" + self.val()))
+        setHashParam("repo", item.name)
+        $("#sectionRepo .repo-details").show()
+        $("#sectionRepo .repo-details h2").text(item.name)
+        $("#sectionRepo .repo-details #repo-url").hide()
+        $("#sectionRepo .repo-details #repo-update").hide()
+        $("#sectionRepo .repo-details #repo-title").text("LOCAL CHART")
+
+        $("#sectionRepo .repo-details ul").html('<span class="spinner-border spinner-border-sm mx-1" role="status" aria-hidden="true"></span>')
+        $("#sectionRepo .repo-details ul").empty()
+        const li = $(`<li class="row p-2 rounded">
+            <h6 class="col-3 py-2">` + item.name + `</h6>
+            <div class="col py-2">` + item.description + `</div>
+            <div class="col-1 py-2">` + item.version + `</div>
+            <div class="col-1 action text-nowrap"><button class="btn btn-sm border-secondary bg-white">Install</button></div>
+        </li>`)
+        li.data("item", item)
+        li.click(repoChartClicked)
+        $("#sectionRepo .repo-details ul").append(li)
+
     })
 }
 
@@ -77,8 +121,13 @@ $("#inputSearch").keyup(function () {
     })
 })
 
-$("#sectionRepo .repo-list .btn").click(function () {
+$("#sectionRepo .repo-list .btn-repo").click(function () {
     const myModal = new bootstrap.Modal(document.getElementById('repoAddModal'), {});
+    myModal.show()
+})
+
+$("#sectionRepo .repo-list .btn-local-chart").click(function () {
+    const myModal = new bootstrap.Modal(document.getElementById('localChartAddModal'), {});
     myModal.show()
 })
 
@@ -96,17 +145,50 @@ $("#repoAddModal .btn-confirm").click(function () {
     })
 })
 
+function toLowerKeys(obj) {
+  const entries = Object.entries(obj);
+
+  return Object.fromEntries(
+    entries.map(([key, value]) => {
+      return [key[0].toLowerCase() + key.slice(1), value];
+    }),
+  );
+}
+
+$("#localChartAddModal .btn-confirm").click(function () {
+    $("#localChartAddModal .btn-confirm").prop("disabled", true).prepend('<span class="spinner-border spinner-border-sm mx-1" role="status" aria-hidden="true"></span>')
+    $.ajax({
+        type: 'POST',
+        url: "/api/helm/local-chart",
+        data: {path: $("#localChartAddModal form input[id=local-chart-path]").val()},
+    }).fail(function (xhr) {
+        reportError("Failed to add local chart", xhr)
+    }).done(function (data) {
+        data = toLowerKeys(data)
+        localStorage.setItem("local-chart-" + data.name, JSON.stringify(data))
+        setHashParam("repo", data.name)
+        window.location.reload()
+    })
+})
+
 $("#sectionRepo .btn-remove").click(function () {
     if (confirm("Confirm removing repository?")) {
-        $.ajax({
-            type: 'DELETE',
-            url: "/api/helm/repo?name=" + $("#sectionRepo .repo-details h2").text(),
-        }).fail(function (xhr) {
-            reportError("Failed to add repo", xhr)
-        }).done(function () {
+        if ($("#sectionRepo .repo-details #repo-title").text() === "LOCAL CHART") {
+            chartName = "local-chart-" + $("#sectionRepo .repo-details h2").text()
+            localStorage.removeItem(chartName)
             setHashParam("repo", null)
             window.location.reload()
-        })
+        } else {
+            $.ajax({
+                type: 'DELETE',
+                url: "/api/helm/repo?name=" + $("#sectionRepo .repo-details h2").text(),
+            }).fail(function (xhr) {
+                reportError("Failed to remove repo", xhr)
+            }).done(function () {
+                setHashParam("repo", null)
+                window.location.reload()
+            })
+        }
     }
 })
 

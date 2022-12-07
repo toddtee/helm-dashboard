@@ -3,11 +3,12 @@ package subproc
 import (
 	"bytes"
 	"encoding/json"
+	"strings"
+
 	"github.com/komodorio/helm-dashboard/pkg/dashboard/utils"
 	log "github.com/sirupsen/logrus"
 	"gopkg.in/yaml.v3"
 	"helm.sh/helm/v3/pkg/chart"
-	"strings"
 )
 
 func (d *DataLayer) ChartRepoList() (res []RepositoryElement, err error) {
@@ -127,12 +128,18 @@ func enrichRepoChartsWithInstalled(charts []*RepoChartElement, installed []Relea
 
 // ShowValues get values from repo chart, not from installed release
 func (d *DataLayer) ShowValues(chart string, ver string) (string, error) {
+	if d.ChartPath != "" {
+		chart = d.ChartPath
+	}
 	return d.Cache.String(CacheKeyRepoChartValues+"\v"+chart+"\v"+ver, nil, func() (string, error) {
 		return d.runCommandHelm("show", "values", chart, "--version", ver)
 	})
 }
 
 func (d *DataLayer) ShowChart(chartName string) ([]*chart.Metadata, error) { // TODO: add version parameter to method
+	if d.ChartPath != "" {
+		chartName = d.ChartPath
+	}
 	out, err := d.Cache.String(CacheKeyShowChart+"\v"+chartName, []string{"chart\v" + chartName}, func() (string, error) {
 		return d.runCommandHelm("show", "chart", chartName)
 	})

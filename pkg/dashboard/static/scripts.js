@@ -74,6 +74,8 @@ function initView() {
     if (section === "repository") {
         $("#topNav ul a.section-repo").addClass("active")
         loadRepoView()
+    // } else if (section === "local-charts") {
+    //     $("#topNav ul a.section-local-charts").addClass("active")
     } else {
         $("#topNav ul a.section-installed").addClass("active")
         const namespace = getHashParam("namespace")
@@ -104,6 +106,8 @@ $("#topNav ul a").click(function () {
         setHashParam("section", "repository")
     } else if (self.hasClass("section-installed")) {
         setHashParam("section", null)
+    // } else if (self.hasClass("section-local-charts")) {
+    //     setHashParam("section", "local-charts")
     } else {
         return
     }

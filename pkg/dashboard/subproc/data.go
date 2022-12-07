@@ -27,6 +27,8 @@ type DataLayer struct {
 	StatusInfo  *StatusInfo
 	Namespace   string
 	Cache       *Cache
+	IsLocal     bool
+	ChartPath   string
 }
 
 type StatusInfo struct {
